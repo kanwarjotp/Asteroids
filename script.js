@@ -149,10 +149,13 @@ function update(){
     }
     else{
         //draw the explosion
-        ctx.strokeStyle = "yellow"
         ctx.beginPath();
-        ctx.fillStyle = "white";
-        ctx.arc(ship.x, ship.y, 1.5 * ship.r, 0, 2 * Math.PI, false);
+        ctx.fillStyle = "darkestred";
+        ctx.arc(ship.x, ship.y, 1.6 * ship.r, 0, 2 * Math.PI, false);
+        ctx.fill();
+        ctx.beginPath();
+        ctx.fillStyle = "darkred";
+        ctx.arc(ship.x, ship.y, 1.4 * ship.r, 0, 2 * Math.PI, false);
         ctx.fill();
         ctx.beginPath();
         ctx.fillStyle = "red";
@@ -160,11 +163,17 @@ function update(){
         ctx.fill();
         ctx.beginPath();
         ctx.fillStyle = "orange";
-        ctx.arc(ship.x, ship.y, 0.6 * ship.r, 0, 2 * Math.PI, false);
-        ctx.closePath();
-        ctx.stroke();
+        ctx.arc(ship.x, ship.y, ship.r, 0, 2 * Math.PI, false);
         ctx.fill();
-        return;
+        ctx.beginPath();
+        ctx.fillStyle = "yellow";
+        ctx.arc(ship.x, ship.y, 0.8 * ship.r, 0, 2 * Math.PI, false);
+        ctx.fill();
+        ctx.beginPath();
+        ctx.fillStyle = "white";
+        ctx.arc(ship.x, ship.y, 0.6 * ship.r, 0, 2 * Math.PI, false);
+        ctx.fill();
+        ctx.closePath();
     }
 
 
