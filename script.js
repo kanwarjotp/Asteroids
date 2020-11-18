@@ -70,8 +70,6 @@ function newAsteroid(x, y){
     for(var i = 0; i < roid.sides; i++){
         roid.offset.push(Math.random() * ROID_JAG * 2 + (1 - ROID_JAG))
     }
-
-
     return roid;
 }
 
@@ -139,7 +137,16 @@ function update(){
     );
     ctx.closePath();
     ctx.stroke();
-    
+
+    if(SHOW_BOUNDS){
+        //adding circular bounds
+        ctx.strokeStyle = "lime";
+        ctx.beginPath();
+        ctx.arc(ship.x, ship.y, ship.r, 0, 2 * Math.PI, false);
+        ctx.closePath();
+        ctx.stroke();
+    }
+
     if(SHOW_CENTER_DOT){
         //center of the ship
         ctx.fillStyle = "blue"
@@ -250,6 +257,15 @@ function update(){
         if(roids[i].y - ROID_SIZE / 2 > GAMEHEIGHT){
             //bottom edge
             roids[i].y = - ROID_SIZE / 3;
+        }
+
+        if(SHOW_BOUNDS){
+            //adding circular bounds
+            ctx.strokeStyle = "lime";
+            ctx.beginPath();
+            ctx.arc(roids[i].x, roids[i].y, roids[i].r, 0, 2 * Math.PI, false);
+            ctx.closePath();
+            ctx.stroke();
         }
 
         //collision detection
