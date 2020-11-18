@@ -209,10 +209,10 @@ function update(){
     }
 
     //draw asteroids
-    ctx.strokeStyle = "green";
-    ctx.lineWidth = SHIP_SIZE / 20;
     var x, y, r, a, sides, offset;
     for(var i = 0; i < roids.length; i++){
+        ctx.strokeStyle = "grey";
+        ctx.lineWidth = SHIP_SIZE / 20;
         //getting asteroid properties
         x = roids[i].x;
         y = roids[i].y;
