@@ -10,6 +10,7 @@ const SHIP_SIZE = 30;
 const TURN_SPEED = 360; // in degrees per second
 const SHIP_ACCL = 2;
 const FRICTION_COEFF = 0.5;
+const SHIP_EXPLODE_DUR = 0.3;
 
 const ROID_NUM = 3; // min roids starting number
 const ROID_SIZE = 80; //max starting size in pixels
@@ -30,7 +31,8 @@ var ship = {
     rot: 0, //rotation speed
     thrustOn: false,
     xThrust: 0,
-    yThrust: 0
+    yThrust: 0,
+    explodeTime: 0
 };
 
 //create asteroids
@@ -111,32 +113,52 @@ function keyDown(evt){
     }
 }
 
+function explodeShip(){
+    ship.explodeTime = SHIP_EXPLODE_DUR * FPS; //duration of exploding affect of ship
+}
+
 //gameloop
 setInterval(update, 1000 / FPS );
 
 function update(){
+    var exploding = ship.explodeTime > 0;
+
     //draw space
     ctx.fillStyle = "black";
     ctx.fillRect(0, 0, GAMEWIDTH, GAMEHEIGHT);
 
     //draw triangular ship
-    ctx.strokeStyle = "white";
-    ctx.lineWidth = SHIP_SIZE / 20;
-    ctx.beginPath();
-    ctx.moveTo( // nose of the ship
-        ship.x + 4 / 3 * ship.r * Math.cos(ship.a), // 4 / 3 is multiplied so that the centeroid of the ship is represented by the blue traingle
-        ship.y - 4 / 3 * ship.r * Math.sin(ship.a)
-    );
-    ctx.lineTo( // rear left of the ship
-        ship.x - ship.r * (2 / 3 * Math.cos(ship.a) + Math.sin(ship.a)),// 2 / 3 is multiplied so that the centeroid of the ship is represented by the blue traingle
-        ship.y + ship.r * (2 / 3 *Math.sin(ship.a) - Math.cos(ship.a))
-    );
-    ctx.lineTo( // rear right of the ship
-        ship.x - ship.r * (2 / 3 * Math.cos(ship.a) - Math.sin(ship.a)),// 2 / 3 is multiplied so that the centeroid of the ship is represented by the blue traingle
-        ship.y + ship.r * (2 / 3 * Math.sin(ship.a) + Math.cos(ship.a))
-    );
-    ctx.closePath();
-    ctx.stroke();
+    if(!exploding){   
+        ctx.strokeStyle = "white";
+        ctx.lineWidth = SHIP_SIZE / 20;
+        ctx.beginPath();
+        ctx.moveTo( // nose of the ship
+            ship.x + 4 / 3 * ship.r * Math.cos(ship.a), // 4 / 3 is multiplied so that the centeroid of the ship is represented by the blue traingle
+            ship.y - 4 / 3 * ship.r * Math.sin(ship.a)
+        );
+        ctx.lineTo( // rear left of the ship
+            ship.x - ship.r * (2 / 3 * Math.cos(ship.a) + Math.sin(ship.a)),// 2 / 3 is multiplied so that the centeroid of the ship is represented by the blue traingle
+            ship.y + ship.r * (2 / 3 *Math.sin(ship.a) - Math.cos(ship.a))
+        );
+        ctx.lineTo( // rear right of the ship
+            ship.x - ship.r * (2 / 3 * Math.cos(ship.a) - Math.sin(ship.a)),// 2 / 3 is multiplied so that the centeroid of the ship is represented by the blue traingle
+            ship.y + ship.r * (2 / 3 * Math.sin(ship.a) + Math.cos(ship.a))
+        );
+        ctx.closePath();
+        ctx.stroke();
+    }
+    else{
+        //draw the explosion
+        ctx.fillStyle = "orange";
+        ctx.strokeStyle = "yellow"
+        ctx.beginPath();
+        ctx.arc(ship.x, ship.y, ship.r, 0, 2 * Math.PI, false);
+        ctx.closePath();
+        ctx.stroke();
+        ctx.fill();
+        return;
+    }
+
 
     if(SHOW_BOUNDS){
         //adding circular bounds
