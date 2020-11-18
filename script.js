@@ -192,40 +192,43 @@ function update(){
         ctx.fillRect(ship.x - 1, ship.y - 1, 3, 3);
     }
 
-    //move the ship
-    if(ship.thrustOn){
-        //angle of the ship gives the direction of movement
-        ship.yThrust += -(SHIP_ACCL * (Math.sin(ship.a))) / FPS;
-        ship.xThrust += SHIP_ACCL * (Math.cos(ship.a)) / FPS;
+    if(!exploding){
+        //move the ship
+        if(ship.thrustOn){
+            //angle of the ship gives the direction of movement
+            ship.yThrust += -(SHIP_ACCL * (Math.sin(ship.a))) / FPS;
+            ship.xThrust += SHIP_ACCL * (Math.cos(ship.a)) / FPS;
+            
+            // drawing the thruster
+            ctx.fillStyle = "cyan";
+            ctx.strokeStyle = "blue";
+            ctx.lineWidth = SHIP_SIZE / 10;
+            ctx.beginPath();
+            ctx.moveTo( // rear left of ship
+                ship.x - ship.r * (2 / 3 * Math.cos(ship.a) + 0.6 * Math.sin(ship.a)),// 0.6 controls the thruster size
+                ship.y + ship.r * (2 / 3 *Math.sin(ship.a) - 0.6 * Math.cos(ship.a))
+            );
+            ctx.lineTo( // rear center
+                ship.x - ship.r * 6 / 3 * Math.cos(ship.a),
+                ship.y + ship.r * 6 / 3 *Math.sin(ship.a)
+            );
+            ctx.lineTo( // rear right of the ship
+                ship.x - ship.r * (2 / 3 * Math.cos(ship.a) - 0.6 * Math.sin(ship.a)),
+                ship.y + ship.r * (2 / 3 * Math.sin(ship.a) + 0.6 *  Math.cos(ship.a))
+            );
+            ctx.closePath();
+            ctx.fill();
+            ctx.stroke();
+        }
+        else{
+            //when thrust is off friction of the space(in this case it exists) will slow the ship down
+            if(ship.xThrust != 0) ship.xThrust -= ship.xThrust * FRICTION_COEFF / FPS;
+            if(ship.yThrust != 0)ship.yThrust -= ship.yThrust * FRICTION_COEFF / FPS;
+        }
+        ship.x += ship.xThrust;
+        ship.y += ship.yThrust;
+    }
 
-        // drawing the thruster
-        ctx.fillStyle = "cyan";
-        ctx.strokeStyle = "blue";
-        ctx.lineWidth = SHIP_SIZE / 10;
-        ctx.beginPath();
-        ctx.moveTo( // rear left of ship
-            ship.x - ship.r * (2 / 3 * Math.cos(ship.a) + 0.6 * Math.sin(ship.a)),// 0.6 controls the thruster size
-            ship.y + ship.r * (2 / 3 *Math.sin(ship.a) - 0.6 * Math.cos(ship.a))
-        );
-        ctx.lineTo( // rear center
-            ship.x - ship.r * 6 / 3 * Math.cos(ship.a),
-            ship.y + ship.r * 6 / 3 *Math.sin(ship.a)
-        );
-        ctx.lineTo( // rear right of the ship
-            ship.x - ship.r * (2 / 3 * Math.cos(ship.a) - 0.6 * Math.sin(ship.a)),
-            ship.y + ship.r * (2 / 3 * Math.sin(ship.a) + 0.6 *  Math.cos(ship.a))
-        );
-        ctx.closePath();
-        ctx.fill();
-        ctx.stroke();
-    }
-    else{
-        //when thrust is off friction of the space(in this case it exists) will slow the ship down
-        if(ship.xThrust != 0) ship.xThrust -= ship.xThrust * FRICTION_COEFF / FPS;
-        if(ship.yThrust != 0)ship.yThrust -= ship.yThrust * FRICTION_COEFF / FPS;
-    }
-    ship.x += ship.xThrust;
-    ship.y += ship.yThrust;
 
     //collision b/w asteroids and ship
     for(var i = 0; i < roids.length; i++){
