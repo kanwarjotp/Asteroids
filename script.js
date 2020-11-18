@@ -188,6 +188,13 @@ function update(){
     ship.x += ship.xThrust;
     ship.y += ship.yThrust;
 
+    //collision b/w asteroids and ship
+    for(var i = 0; i < roids.length; i++){
+        if(distBetweenPoints(ship.x, ship.y, roids[i].x, roids[i].y) <= ship.r + roids[i].r){
+            explodeShip(); 
+        }
+    }
+
     //rotate the ship
     ship.a += ship.rot;
 
@@ -267,15 +274,8 @@ function update(){
             ctx.closePath();
             ctx.stroke();
         }
-
-        //collision detection
-        if(roids[i].x == ship.x){
-            if(roids[i].y == ship.y){
-                alert("Collision");
-            }
-        }
-
     }
+
 
 
     //draw ufos
