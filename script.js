@@ -11,6 +11,8 @@ const TURN_SPEED = 360; // in degrees per second
 const SHIP_ACCL = 2;
 const FRICTION_COEFF = 0.5;
 const SHIP_EXPLODE_DUR = 0.5;
+const SHIP_INVLB_DUR = 1; // time dur for which the ship is invulnerable after spawn
+const SHIP_BLINK_DUR = 0.1; // time dur for which the ship blinks after spawn
 
 const ROID_NUM = 3; // min roids starting number
 const ROID_SIZE = 80; //max starting size in pixels
@@ -72,6 +74,8 @@ function newShip(){
         r: SHIP_SIZE / 2,
         a: 90 / 180 * Math.PI, //facing upwards pi/2 radians
         rot: 0, //rotation speed
+        blinkTime: Math.ceil(SHIP_BLINK_DUR * FPS),
+        blinkNum: Math.ceil(SHIP_INVLB_DUR / SHIP_BLINK_DUR),
         thrustOn: false,
         xThrust: 0,
         yThrust: 0,
@@ -125,6 +129,7 @@ function explodeShip(){
 setInterval(update, 1000 / FPS );
 
 function update(){
+    var blinkOn = ship.blinkNum % 2 == 0 ? true : false;
     var exploding = ship.explodeTime > 0;
 
     //draw space
@@ -133,23 +138,38 @@ function update(){
 
     //draw triangular ship
     if(!exploding){   
-        ctx.strokeStyle = "white";
-        ctx.lineWidth = SHIP_SIZE / 20;
-        ctx.beginPath();
-        ctx.moveTo( // nose of the ship
-            ship.x + 4 / 3 * ship.r * Math.cos(ship.a), // 4 / 3 is multiplied so that the centeroid of the ship is represented by the blue traingle
-            ship.y - 4 / 3 * ship.r * Math.sin(ship.a)
-        );
-        ctx.lineTo( // rear left of the ship
-            ship.x - ship.r * (2 / 3 * Math.cos(ship.a) + Math.sin(ship.a)),// 2 / 3 is multiplied so that the centeroid of the ship is represented by the blue traingle
-            ship.y + ship.r * (2 / 3 *Math.sin(ship.a) - Math.cos(ship.a))
-        );
-        ctx.lineTo( // rear right of the ship
-            ship.x - ship.r * (2 / 3 * Math.cos(ship.a) - Math.sin(ship.a)),// 2 / 3 is multiplied so that the centeroid of the ship is represented by the blue traingle
-            ship.y + ship.r * (2 / 3 * Math.sin(ship.a) + Math.cos(ship.a))
-        );
-        ctx.closePath();
-        ctx.stroke();
+        if(blinkOn){
+            ctx.strokeStyle = "white";
+            ctx.lineWidth = SHIP_SIZE / 20;
+            ctx.beginPath();
+            ctx.moveTo( // nose of the ship
+                ship.x + 4 / 3 * ship.r * Math.cos(ship.a), // 4 / 3 is multiplied so that the centeroid of the ship is represented by the blue traingle
+                ship.y - 4 / 3 * ship.r * Math.sin(ship.a)
+            );
+            ctx.lineTo( // rear left of the ship
+                ship.x - ship.r * (2 / 3 * Math.cos(ship.a) + Math.sin(ship.a)),// 2 / 3 is multiplied so that the centeroid of the ship is represented by the blue traingle
+                ship.y + ship.r * (2 / 3 *Math.sin(ship.a) - Math.cos(ship.a))
+            );
+            ctx.lineTo( // rear right of the ship
+                ship.x - ship.r * (2 / 3 * Math.cos(ship.a) - Math.sin(ship.a)),// 2 / 3 is multiplied so that the centeroid of the ship is represented by the blue traingle
+                ship.y + ship.r * (2 / 3 * Math.sin(ship.a) + Math.cos(ship.a))
+            );
+            ctx.closePath();
+            ctx.stroke();
+        }
+
+        //handle blinking
+        if(ship.blinkNum > 0){
+            //reduce blink time
+            ship.blinkTime--;
+
+            //reduce blink num
+            if(ship.blinkTime == 0){
+                ship.blinkTime = Math.ceil(SHIP_BLINK_DUR * FPS);
+                ship.blinkNum--;
+            }
+        }
+
     }
     else{
         //draw the explosion
@@ -235,11 +255,15 @@ function update(){
 
     if(!exploding){
         //collision b/w asteroids and ship
-        for(var i = 0; i < roids.length; i++){
-            if(distBetweenPoints(ship.x, ship.y, roids[i].x, roids[i].y) <= ship.r + roids[i].r){
-                explodeShip(); 
+        console.log(blinkOn);
+        if(ship.blinkNum == 0){
+            for(var i = 0; i < roids.length; i++){
+                if(distBetweenPoints(ship.x, ship.y, roids[i].x, roids[i].y) <= ship.r + roids[i].r){
+                    explodeShip(); 
+                }
             }
         }
+
 
         //rotate the ship
         ship.a += ship.rot;
