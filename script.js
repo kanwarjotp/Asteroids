@@ -10,7 +10,7 @@ const SHIP_SIZE = 30;
 const TURN_SPEED = 360; // in degrees per second
 const SHIP_ACCL = 2;
 const FRICTION_COEFF = 0.5;
-const SHIP_EXPLODE_DUR = 0.3;
+const SHIP_EXPLODE_DUR = 0.5;
 
 const ROID_NUM = 3; // min roids starting number
 const ROID_SIZE = 80; //max starting size in pixels
@@ -18,22 +18,12 @@ const ROID_SPD = 50; //max roids starting speed in pixels per second
 const ROID_SIDE = 10; //avg number of vertices
 const ROID_JAG = 0.7; //asteroids's jageredness(0: none, 1: max)
 
-const SHOW_CENTER_DOT = true;
-const SHOW_BOUNDS = true; //show/hide collision bounding 
+const SHOW_CENTER_DOT = false;
+const SHOW_BOUNDS = false; //show/hide collision bounding 
 
 
 //create ship
-var ship = {
-    x: GAMEWIDTH / 2,
-    y: GAMEHEIGHT / 2,
-    r: SHIP_SIZE / 2,
-    a: 90 / 180 * Math.PI, //facing upwards pi/2 radians
-    rot: 0, //rotation speed
-    thrustOn: false,
-    xThrust: 0,
-    yThrust: 0,
-    explodeTime: 0
-};
+var ship = newShip();
 
 //create asteroids
 var roids = [];
@@ -73,6 +63,20 @@ function newAsteroid(x, y){
         roid.offset.push(Math.random() * ROID_JAG * 2 + (1 - ROID_JAG))
     }
     return roid;
+}
+
+function newShip(){
+    return {
+        x: GAMEWIDTH / 2,
+        y: GAMEHEIGHT / 2,
+        r: SHIP_SIZE / 2,
+        a: 90 / 180 * Math.PI, //facing upwards pi/2 radians
+        rot: 0, //rotation speed
+        thrustOn: false,
+        xThrust: 0,
+        yThrust: 0,
+        explodeTime: 0
+    };
 }
 
 //set up event handler
@@ -239,6 +243,13 @@ function update(){
 
         //rotate the ship
         ship.a += ship.rot;
+    }
+    else{
+        ship.explodeTime--;
+
+        if(ship.explodeTime == 0){
+            ship = newShip();
+        }
     }
 
     //handling edges of the screen
