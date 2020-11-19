@@ -229,7 +229,7 @@ function update(){
         ship.y += ship.yThrust;
     }
 
-
+    if(!exploding)
     //collision b/w asteroids and ship
     for(var i = 0; i < roids.length; i++){
         if(distBetweenPoints(ship.x, ship.y, roids[i].x, roids[i].y) <= ship.r + roids[i].r){
