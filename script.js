@@ -216,7 +216,7 @@ function update(){
         ctx.fillRect(ship.x - 1, ship.y - 1, 3, 3);
     }
 
-    if(!exploding){
+    if(!exploding && blinkOn){
         //move the ship
         if(ship.thrustOn){
             //angle of the ship gives the direction of movement
