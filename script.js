@@ -229,16 +229,17 @@ function update(){
         ship.y += ship.yThrust;
     }
 
-    if(!exploding)
-    //collision b/w asteroids and ship
-    for(var i = 0; i < roids.length; i++){
-        if(distBetweenPoints(ship.x, ship.y, roids[i].x, roids[i].y) <= ship.r + roids[i].r){
-            explodeShip(); 
+    if(!exploding){
+        //collision b/w asteroids and ship
+        for(var i = 0; i < roids.length; i++){
+            if(distBetweenPoints(ship.x, ship.y, roids[i].x, roids[i].y) <= ship.r + roids[i].r){
+                explodeShip(); 
+            }
         }
-    }
 
-    //rotate the ship
-    ship.a += ship.rot;
+        //rotate the ship
+        ship.a += ship.rot;
+    }
 
     //handling edges of the screen
     if(ship.x + SHIP_SIZE / 2 < 0){
