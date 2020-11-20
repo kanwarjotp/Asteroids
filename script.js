@@ -375,6 +375,7 @@ function update(){
                 if(distBetweenPoints(ship.x, ship.y, roids[i].x, roids[i].y) <= ship.r + roids[i].r){
                     explodeShip(); 
                     destroyAsteroid(i);
+                    break;
                 }
             }
         }
