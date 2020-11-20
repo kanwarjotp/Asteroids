@@ -13,6 +13,8 @@ const FRICTION_COEFF = 0.5;
 const SHIP_EXPLODE_DUR = 0.5;
 const SHIP_INVLB_DUR = 1; // time dur for which the ship is invulnerable after spawn
 const SHIP_BLINK_DUR = 0.1; // time dur for which the ship blinks after spawn
+const MAX_LASERS = 10 // maximum number of lasers at one time
+const LASER_SPD = 500; //laser spd in pixel per sec
 
 const ROID_NUM = 3; // min roids starting number
 const ROID_SIZE = 80; //max starting size in pixels
@@ -79,13 +81,33 @@ function newShip(){
         thrustOn: false,
         xThrust: 0,
         yThrust: 0,
-        explodeTime: 0
+        explodeTime: 0,
+        canShoot: true,
+        lasers: []        
     };
 }
 
 //set up event handler
 document.addEventListener("keydown", keyDown);
 document.addEventListener("keyup", keyUp);
+
+function shootLaser(){
+    //create laser obj
+    if(ship.canShoot){
+        if(ship.lasers.length < 10){
+            //pushing laser object
+            ship.lasers.push({
+                x: ship.x + 4 / 3 * ship.r * Math.cos(ship.a),
+                y: ship.y - 4 / 3 * ship.r * Math.sin(ship.a),
+                xv: LASER_SPD * Math.cos(ship.a) / FPS,
+                yv: - (LASER_SPD * Math.sin(ship.a) / FPS)
+            })
+        }
+    }
+
+    //prevent further shooting
+    ship.canShoot = false;
+}
 
 function keyUp(evt){
     switch(evt.keyCode){
@@ -100,6 +122,10 @@ function keyUp(evt){
         case 39:
             //stop right
             ship.rot = 0;
+            break;
+        case 32:
+            //shoot lasers
+            shootLaser();
             break;
     }
 }
@@ -117,6 +143,9 @@ function keyDown(evt){
         case 39:
             //right
             ship.rot = - (TURN_SPEED / 180 * Math.PI / FPS);
+            break;
+        case 32:
+            ship.canShoot = true;
             break;
     }
 }
@@ -216,6 +245,35 @@ function update(){
         ctx.fillRect(ship.x - 1, ship.y - 1, 3, 3);
     }
 
+    //draw laser
+    for(var i = 0; i < ship.lasers.length; i++){
+        ctx.fillStyle = "salmon";
+        ctx.beginPath();
+        ctx.arc(ship.lasers[i].x, ship.lasers[i].y, SHIP_SIZE / 15, 0, Math.PI * 2, false);
+        ctx.closePath();
+        ctx.fill();
+    }
+
+    //moving the lasers
+    for(var i = 0; i < ship.lasers.length; i++){
+        ship.lasers[i].x += ship.lasers[i].xv;
+        ship.lasers[i].y += ship.lasers[i].yv;
+
+        //handling edges of screen
+        if(ship.lasers[i].x < 0){
+            ship.lasers[i].x = GAMEWIDTH;
+        }
+        else if(ship.lasers[i].x > GAMEWIDTH){
+            ship.lasers[i].x = 0;
+        }
+        else if(ship.lasers[i].y < 0){
+            ship.lasers[i].y = GAMEHEIGHT;
+        }
+        else if(ship.lasers[i].y > GAMEHEIGHT){
+            ship.lasers[i].y = 0;
+        }
+    }
+
     if(!exploding && blinkOn){
         //move the ship
         if(ship.thrustOn){
@@ -255,7 +313,6 @@ function update(){
 
     if(!exploding){
         //collision b/w asteroids and ship
-        console.log(blinkOn);
         if(ship.blinkNum == 0){
             for(var i = 0; i < roids.length; i++){
                 if(distBetweenPoints(ship.x, ship.y, roids[i].x, roids[i].y) <= ship.r + roids[i].r){
