@@ -257,10 +257,11 @@ function update(){
     }
 
     //moving the lasers
-    for(var i = 0; i < ship.lasers.length; i++){
-        //check dist traveeld
+    for(var i = ship.lasers.length - 1; i >= 0; i--){
+        //check dist traveled
         if(ship.lasers[i].dist > LASER_DIST * GAMEWIDTH){
             ship.lasers.splice(i, 1);
+            continue;
         }
 
         ship.lasers[i].x += ship.lasers[i].xv;
