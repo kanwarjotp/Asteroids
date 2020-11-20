@@ -598,7 +598,6 @@ function update(){
     ctx.textBaseline = "middle";
     ctx.fillStyle = "white"
     ctx.font = "small-caps " + (TEXT_SIZE - 10) + " arial";
-    console.log(scoreHigh);
     ctx.fillText("BEST "+scoreHigh, GAMEWIDTH / 2 - SHIP_SIZE / 2, SHIP_SIZE);
 
     //drawing the game text
