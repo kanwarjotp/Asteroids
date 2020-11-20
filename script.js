@@ -15,6 +15,7 @@ const SHIP_INVLB_DUR = 1; // time dur for which the ship is invulnerable after s
 const SHIP_BLINK_DUR = 0.1; // time dur for which the ship blinks after spawn
 const MAX_LASERS = 10 // maximum number of lasers at one time
 const LASER_SPD = 500; //laser spd in pixel per sec
+const LASER_DIST = 0.6; //max dist laser can travel in terms of screen size 
 
 const ROID_NUM = 3; // min roids starting number
 const ROID_SIZE = 80; //max starting size in pixels
@@ -100,7 +101,8 @@ function shootLaser(){
                 x: ship.x + 4 / 3 * ship.r * Math.cos(ship.a),
                 y: ship.y - 4 / 3 * ship.r * Math.sin(ship.a),
                 xv: LASER_SPD * Math.cos(ship.a) / FPS,
-                yv: - (LASER_SPD * Math.sin(ship.a) / FPS)
+                yv: - (LASER_SPD * Math.sin(ship.a) / FPS),
+                dist: 0
             })
         }
     }
@@ -256,9 +258,17 @@ function update(){
 
     //moving the lasers
     for(var i = 0; i < ship.lasers.length; i++){
+        //check dist traveeld
+        if(ship.lasers[i].dist > LASER_DIST * GAMEWIDTH){
+            ship.lasers.splice(i, 1);
+        }
+
         ship.lasers[i].x += ship.lasers[i].xv;
         ship.lasers[i].y += ship.lasers[i].yv;
 
+        //calculate diatnce travelled
+        ship.lasers[i].dist += Math.sqrt(Math.pow(ship.lasers[i].xv, 2) + Math.pow(ship.lasers[i].yv, 2));
+        
         //handling edges of screen
         if(ship.lasers[i].x < 0){
             ship.lasers[i].x = GAMEWIDTH;
