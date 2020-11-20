@@ -587,7 +587,6 @@ function update(){
     ctx.textBaseline = "right";
     ctx.fillStyle = "white"
     ctx.font = "small-caps " + (TEXT_SIZE - 10) + " arial";
-    console.log(score);
     ctx.fillText(score, GAMEWIDTH - SHIP_SIZE, SHIP_SIZE);
 
     //drawing high score
