@@ -6,6 +6,7 @@ var ctx = gameScreen.getContext("2d");
 
 const GAMEWIDTH = gameScreen.width;
 const GAMEHEIGHT = gameScreen.height;
+const GAME_LIVES = 3; //starting number of lives
 const SHIP_SIZE = 30;
 const TURN_SPEED = 360; // in degrees per second
 const SHIP_ACCL = 2;
@@ -31,7 +32,7 @@ const TEXT_FADE_TIME = 2.5; //text fade time in seconds
 const TEXT_SIZE = 40; //text height in pixels
 
 //set up the game parameters
-var level, ship, roids, text, textAlpha;
+var level, ship, roids, text, lives, textAlpha;
 newGame();
 
 function createAsteroidBelt(){
@@ -113,15 +114,37 @@ function newShip(){
         yThrust: 0,
         explodeTime: 0,
         canShoot: true,
-        lasers: []        
+        lasers: [],
+        dead: false        
     };
 }
 
 function newGame(){
     level = 0;
     //create ship
+    lives = GAME_LIVES;
     ship = newShip();
     newLevel();
+}
+
+function drawShip(x, y, a){
+    ctx.strokeStyle = "white";
+    ctx.lineWidth = SHIP_SIZE / 20;
+    ctx.beginPath();
+    ctx.moveTo( // nose of the ship
+        x + 4 / 3 * ship.r * Math.cos(a), // 4 / 3 is multiplied so that the centeroid of the ship is represented by the blue traingle
+        y - 4 / 3 * ship.r * Math.sin(a)
+    );
+    ctx.lineTo( // rear left of the ship
+        x - ship.r * (2 / 3 * Math.cos(a) + Math.sin(a)),// 2 / 3 is multiplied so that the centeroid of the ship is represented by the blue traingle
+        y + ship.r * (2 / 3 *Math.sin(a) - Math.cos(a))
+    );
+    ctx.lineTo( // rear right of the ship
+        x - ship.r * (2 / 3 * Math.cos(a) - Math.sin(a)),// 2 / 3 is multiplied so that the centeroid of the ship is represented by the blue traingle
+        y + ship.r * (2 / 3 * Math.sin(a) + Math.cos(a))
+    );
+    ctx.closePath();
+    ctx.stroke();
 }
 
 function newLevel(){
@@ -155,6 +178,9 @@ function shootLaser(){
 }
 
 function keyUp(evt){
+    if(ship.dead){
+        return;
+    }
     switch(evt.keyCode){
         case 37:
             //stop left
@@ -176,6 +202,9 @@ function keyUp(evt){
 }
 
 function keyDown(evt){
+    if(ship.dead){
+        return;
+    }
     switch(evt.keyCode){
         case 37:
             //left
@@ -199,6 +228,12 @@ function explodeShip(){
     ship.explodeTime = SHIP_EXPLODE_DUR * FPS; //duration of exploding affect of ship
 }
 
+function gameOver(){
+    ship.dead = true;
+    text = "Game Over";
+    textAlpha = 1.0;
+}
+
 //gameloop
 setInterval(update, 1000 / FPS );
 
@@ -210,71 +245,56 @@ function update(){
     //draw space
     ctx.fillStyle = "black";
     ctx.fillRect(0, 0, GAMEWIDTH, GAMEHEIGHT);
-
-    //draw triangular ship
-    if(!exploding){   
-        if(blinkOn){
-            ctx.strokeStyle = "white";
-            ctx.lineWidth = SHIP_SIZE / 20;
-            ctx.beginPath();
-            ctx.moveTo( // nose of the ship
-                ship.x + 4 / 3 * ship.r * Math.cos(ship.a), // 4 / 3 is multiplied so that the centeroid of the ship is represented by the blue traingle
-                ship.y - 4 / 3 * ship.r * Math.sin(ship.a)
-            );
-            ctx.lineTo( // rear left of the ship
-                ship.x - ship.r * (2 / 3 * Math.cos(ship.a) + Math.sin(ship.a)),// 2 / 3 is multiplied so that the centeroid of the ship is represented by the blue traingle
-                ship.y + ship.r * (2 / 3 *Math.sin(ship.a) - Math.cos(ship.a))
-            );
-            ctx.lineTo( // rear right of the ship
-                ship.x - ship.r * (2 / 3 * Math.cos(ship.a) - Math.sin(ship.a)),// 2 / 3 is multiplied so that the centeroid of the ship is represented by the blue traingle
-                ship.y + ship.r * (2 / 3 * Math.sin(ship.a) + Math.cos(ship.a))
-            );
-            ctx.closePath();
-            ctx.stroke();
-        }
-
-        //handle blinking
-        if(ship.blinkNum > 0){
-            //reduce blink time
-            ship.blinkTime--;
-
-            //reduce blink num
-            if(ship.blinkTime == 0){
-                ship.blinkTime = Math.ceil(SHIP_BLINK_DUR * FPS);
-                ship.blinkNum--;
+    
+    if(!ship.dead){
+        //draw triangular ship
+        if(!exploding){   
+            if(blinkOn){
+                drawShip(ship.x, ship.y, ship.a);
             }
+
+            //handle blinking
+            if(ship.blinkNum > 0){
+                //reduce blink time
+                ship.blinkTime--;
+
+                //reduce blink num
+                if(ship.blinkTime == 0){
+                    ship.blinkTime = Math.ceil(SHIP_BLINK_DUR * FPS);
+                    ship.blinkNum--;
+                }
+            }
+
         }
-
+        else{
+            //draw the explosion
+            ctx.beginPath();
+            ctx.fillStyle = "darkestred";
+            ctx.arc(ship.x, ship.y, 1.6 * ship.r, 0, 2 * Math.PI, false);
+            ctx.fill();
+            ctx.beginPath();
+            ctx.fillStyle = "darkred";
+            ctx.arc(ship.x, ship.y, 1.4 * ship.r, 0, 2 * Math.PI, false);
+            ctx.fill();
+            ctx.beginPath();
+            ctx.fillStyle = "red";
+            ctx.arc(ship.x, ship.y, 1.2 * ship.r, 0, 2 * Math.PI, false);
+            ctx.fill();
+            ctx.beginPath();
+            ctx.fillStyle = "orange";
+            ctx.arc(ship.x, ship.y, ship.r, 0, 2 * Math.PI, false);
+            ctx.fill();
+            ctx.beginPath();
+            ctx.fillStyle = "yellow";
+            ctx.arc(ship.x, ship.y, 0.8 * ship.r, 0, 2 * Math.PI, false);
+            ctx.fill();
+            ctx.beginPath();
+            ctx.fillStyle = "white";
+            ctx.arc(ship.x, ship.y, 0.6 * ship.r, 0, 2 * Math.PI, false);
+            ctx.fill();
+            ctx.closePath();
+        }
     }
-    else{
-        //draw the explosion
-        ctx.beginPath();
-        ctx.fillStyle = "darkestred";
-        ctx.arc(ship.x, ship.y, 1.6 * ship.r, 0, 2 * Math.PI, false);
-        ctx.fill();
-        ctx.beginPath();
-        ctx.fillStyle = "darkred";
-        ctx.arc(ship.x, ship.y, 1.4 * ship.r, 0, 2 * Math.PI, false);
-        ctx.fill();
-        ctx.beginPath();
-        ctx.fillStyle = "red";
-        ctx.arc(ship.x, ship.y, 1.2 * ship.r, 0, 2 * Math.PI, false);
-        ctx.fill();
-        ctx.beginPath();
-        ctx.fillStyle = "orange";
-        ctx.arc(ship.x, ship.y, ship.r, 0, 2 * Math.PI, false);
-        ctx.fill();
-        ctx.beginPath();
-        ctx.fillStyle = "yellow";
-        ctx.arc(ship.x, ship.y, 0.8 * ship.r, 0, 2 * Math.PI, false);
-        ctx.fill();
-        ctx.beginPath();
-        ctx.fillStyle = "white";
-        ctx.arc(ship.x, ship.y, 0.6 * ship.r, 0, 2 * Math.PI, false);
-        ctx.fill();
-        ctx.closePath();
-    }
-
 
     if(SHOW_BOUNDS){
         //adding circular bounds
@@ -293,7 +313,6 @@ function update(){
 
     //draw laser
     for(var i = 0; i < ship.lasers.length; i++){
-        console.log("at draw", ship.lasers[i].explodeTime)
         if(ship.lasers[i].explodeTime == 0){
             ctx.fillStyle = "salmon";
             ctx.beginPath();
@@ -354,11 +373,7 @@ function update(){
 
         //handle explosion
         if(ship.lasers[i].explodeTime > 0){
-            console.log("at moving", ship.lasers[i].explodeTime);
             ship.lasers[i].explodeTime--;
-            console.log("after moving i", ship.lasers[i].explodeTime)
-
-
 
             // destroy the laser after explosion
             if(ship.lasers[i].explodeTime == 0){
@@ -392,7 +407,7 @@ function update(){
 
     if(!exploding && blinkOn){
         //move the ship
-        if(ship.thrustOn){
+        if(ship.thrustOn && !ship.dead){
             //angle of the ship gives the direction of movement
             ship.yThrust += -(SHIP_ACCL * (Math.sin(ship.a))) / FPS;
             ship.xThrust += SHIP_ACCL * (Math.cos(ship.a)) / FPS;
@@ -425,9 +440,12 @@ function update(){
         }
         ship.x += ship.xThrust;
         ship.y += ship.yThrust;
+
+        //rotate the ship
+        ship.a += ship.rot;
     }
 
-    if(!exploding){
+    if(!exploding && !ship.dead){
         //collision b/w asteroids and ship
         if(ship.blinkNum == 0){
             for(var i = 0; i < roids.length; i++){
@@ -438,16 +456,18 @@ function update(){
                 }
             }
         }
-
-
-        //rotate the ship
-        ship.a += ship.rot;
     }
     else{
         ship.explodeTime--;
 
         if(ship.explodeTime == 0){
             ship = newShip();
+            //decrementing lives
+            lives--;
+
+            if(lives == 0){
+                gameOver();
+            }
         }
     }
 
@@ -537,13 +557,20 @@ function update(){
     //move the ufos
 
 
+    //drawing lives on game screen
+    for(var i = 0; i < lives; i++){
+        drawShip(SHIP_SIZE + i * 1.2 * SHIP_SIZE, SHIP_SIZE, 0.5 * Math.PI);
+    }
+
     //drawing the game text
     if(textAlpha >= 0){
-        console.log("9");
         ctx.fillStyle = "rgba(255, 255, 255, " + textAlpha + ")";
         ctx.font = "small-caps " + TEXT_SIZE + "px arial";
         ctx.fillText(text, GAMEWIDTH * 0.43 , GAMEHEIGHT / 4);
         textAlpha -= (1.0 / TEXT_FADE_TIME / FPS);
+    }
+    else if(ship.dead){
+        newGame();
     }
 
 }
