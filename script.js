@@ -502,21 +502,21 @@ function update(){
         roids[i].y += roids[i].yv;
 
         //handle edge of screen
-        if(roids[i].x + ROID_SIZE / 2 < 0){
+        if(roids[i].x + roids[i].r / 2 < 0){
             //left edge
-            roids[i].x = GAMEWIDTH + ROID_SIZE / 3; // ship appears in from right
+            roids[i].x = GAMEWIDTH + roids[i].r * 0.25; // ship appears in from right
         }
-        if(roids[i].x - ROID_SIZE / 2 > GAMEWIDTH){
+        if(roids[i].x - roids[i].r / 2 > GAMEWIDTH){
             //right edge
-            roids[i].x = - ROID_SIZE / 3;
+            roids[i].x = - roids[i].r * 0.25;
         }
-        if(roids[i].y + ROID_SIZE / 2 < 0){
+        if(roids[i].y + roids[i].r / 2 < 0){
             //top edge
-            roids[i].y = GAMEHEIGHT + ROID_SIZE / 3;
+            roids[i].y = GAMEHEIGHT + roids[i].r * 0.25;
         }
-        if(roids[i].y - ROID_SIZE / 2 > GAMEHEIGHT){
+        if(roids[i].y - roids[i].r / 2 > GAMEHEIGHT){
             //bottom edge
-            roids[i].y = - ROID_SIZE / 3;
+            roids[i].y = - roids[i].r * 0.25;
         }
 
         if(SHOW_BOUNDS){
