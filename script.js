@@ -18,7 +18,7 @@ const LASER_SPD = 500; //laser spd in pixel per sec
 const LASER_DIST = 0.6; //max dist laser can travel in terms of screen size 
 const LASER_EXPLD_DUR = 3; // exlosion animation duration (always keep more than 2)
 
-const ROID_NUM = 3; // min roids starting number
+const ROID_NUM = 1; // min roids starting number
 const ROID_SIZE = 100; //max starting size in pixels
 const ROID_SPD = 50; //max roids starting speed in pixels per second
 const ROID_SIDE = 10; //avg number of vertices
@@ -27,9 +27,11 @@ const ROID_JAG = 0.7; //asteroids's jageredness(0: none, 1: max)
 const SHOW_CENTER_DOT = false;
 const SHOW_BOUNDS = false; //show/hide collision bounding 
 
+const TEXT_FADE_TIME = 2.5; //text fade time in seconds
+const TEXT_SIZE = 40; //text height in pixels
 
 //set up the game parameters
-var level, ship, roids;
+var level, ship, roids, text, textAlpha;
 newGame();
 
 function createAsteroidBelt(){
@@ -90,7 +92,11 @@ function destroyAsteroid(i){
     //last gen destroid
     roids.splice(i, 1);
 
-    //new level 
+    //new level when all asteroids destroyed
+    if(roids.length == 0){
+        level++;
+        newLevel();
+    }
 }
 
 function newShip(){
@@ -116,10 +122,11 @@ function newGame(){
     //create ship
     ship = newShip();
     newLevel();
-
 }
 
 function newLevel(){
+    text = "Level " + (level + 1);
+    textAlpha = 1.0;
     createAsteroidBelt();
 }
 
@@ -196,6 +203,7 @@ function explodeShip(){
 setInterval(update, 1000 / FPS );
 
 function update(){
+
     var blinkOn = ship.blinkNum % 2 == 0 ? true : false;
     var exploding = ship.explodeTime > 0;
 
@@ -528,6 +536,15 @@ function update(){
 
     //move the ufos
 
+
+    //drawing the game text
+    if(textAlpha >= 0){
+        console.log("9");
+        ctx.fillStyle = "rgba(255, 255, 255, " + textAlpha + ")";
+        ctx.font = "small-caps " + TEXT_SIZE + "px arial";
+        ctx.fillText(text, GAMEWIDTH * 0.43 , GAMEHEIGHT / 4);
+        textAlpha -= (1.0 / TEXT_FADE_TIME / FPS);
+    }
 
 }
 
