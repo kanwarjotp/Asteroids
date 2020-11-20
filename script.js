@@ -18,7 +18,7 @@ const LASER_SPD = 500; //laser spd in pixel per sec
 const LASER_DIST = 0.6; //max dist laser can travel in terms of screen size 
 
 const ROID_NUM = 3; // min roids starting number
-const ROID_SIZE = 80; //max starting size in pixels
+const ROID_SIZE = 100; //max starting size in pixels
 const ROID_SPD = 50; //max roids starting speed in pixels per second
 const ROID_SIDE = 10; //avg number of vertices
 const ROID_JAG = 0.7; //asteroids's jageredness(0: none, 1: max)
@@ -42,7 +42,7 @@ function createAsteroidBelt(){
             x = Math.floor(Math.random() * GAMEWIDTH);
             y = Math.floor(Math.random() * GAMEHEIGHT);
         } while(distBetweenPoints(ship.x, ship.y, x, y) < ROID_SIZE * 1.5 + ship.r); // 1.5 is the buffer zone coefficient
-        roids.push(newAsteroid(x, y));
+        roids.push(newAsteroid(x, y, Math.ceil(ROID_SIZE / 2)));
     }
 }
 
@@ -51,13 +51,13 @@ function distBetweenPoints(x1, y1, x2, y2){
 }
 
 //function creating indvd asteroids
-function newAsteroid(x, y){
+function newAsteroid(x, y, r){
     var roid = {
         x: x,
         y: y,
         xv: Math.random() * ROID_SPD / FPS * (Math.random() < 0.5 ? 1 : -1),// x velocity, +ve for < 0.5 and -ve otherwise
         yv: Math.random() * ROID_SPD / FPS * (Math.random() < 0.5 ? 1 : -1),// y velocity, +ve for < 0.5 and -ve otherwise
-        r: ROID_SIZE / 2,
+        r: r,
         a: Math.random() * Math.PI * 2, // angle in radians
         sides: Math.floor(Math.random() * (ROID_SIDE + 1) + ROID_SIDE / 2),
         offset: []
@@ -68,6 +68,28 @@ function newAsteroid(x, y){
         roid.offset.push(Math.random() * ROID_JAG * 2 + (1 - ROID_JAG))
     }
     return roid;
+}
+
+function destroyAsteroid(i){
+    var x = roids[i].x;
+    var y = roids[i].y;
+    var r = roids[i].r;
+
+    //split asteroid
+    if(r == Math.ceil(ROID_SIZE / 2)){
+        //original size
+        roids.push(newAsteroid(x, y, r / 2));
+        roids.push(newAsteroid(x, y, r / 2));
+    }
+    else if(r == Math.ceil(ROID_SIZE/ 4)){
+        //secong gen
+        roids.push(newAsteroid(x, y, r / 4));
+        roids.push(newAsteroid(x, y, r / 4));
+    }
+
+    //last gen destroid
+    roids.splice(i, 1);
+
 }
 
 function newShip(){
@@ -256,6 +278,30 @@ function update(){
         ctx.fill();
     }
 
+    //detect laser hits
+    var ax, ay, ar, lx, ly;
+    for(var i = roids.length - 1; i >= 0; i--){
+        //asteroid properties
+        ax = roids[i].x;
+        ay = roids[i].y;
+        ar = roids[i].r;
+
+        //loop over the lasers
+        for(var j = ship.lasers.length - 1; j >= 0; j--){
+            lx = ship.lasers[j].x;
+            ly = ship.lasers[j].y;
+
+            //detect hits
+            if(distBetweenPoints(ax, ay, lx, ly) <= ar){
+                //remove the laser
+                ship.lasers.splice(j, 1);
+                //deal damage to asteroid
+                destroyAsteroid(i);
+                break;
+            }
+        }
+    }
+
     //moving the lasers
     for(var i = ship.lasers.length - 1; i >= 0; i--){
         //check dist traveled
@@ -328,6 +374,7 @@ function update(){
             for(var i = 0; i < roids.length; i++){
                 if(distBetweenPoints(ship.x, ship.y, roids[i].x, roids[i].y) <= ship.r + roids[i].r){
                     explodeShip(); 
+                    destroyAsteroid(i);
                 }
             }
         }
