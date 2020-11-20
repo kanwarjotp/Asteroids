@@ -571,9 +571,6 @@ function update(){
             ctx.stroke();
         }
     }
-
-
-
     //draw ufos
 
 
