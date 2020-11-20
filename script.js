@@ -24,6 +24,9 @@ const ROID_SIZE = 100; //max starting size in pixels
 const ROID_SPD = 50; //max roids starting speed in pixels per second
 const ROID_SIDE = 10; //avg number of vertices
 const ROID_JAG = 0.7; //asteroids's jageredness(0: none, 1: max)
+const ROID_PTS_LR = 20; //points large asteroid is worth
+const ROID_PTS_ME = 50; //points medium asteroid is worth
+const ROID_PTS_SM = 100; //points small asteroid is worth
 
 const SHOW_CENTER_DOT = false;
 const SHOW_BOUNDS = false; //show/hide collision bounding 
@@ -32,7 +35,7 @@ const TEXT_FADE_TIME = 2.5; //text fade time in seconds
 const TEXT_SIZE = 40; //text height in pixels
 
 //set up the game parameters
-var level, ship, roids, text, lives, textAlpha;
+var level, ship, roids, score, text, lives, textAlpha;
 newGame();
 
 function createAsteroidBelt(){
@@ -83,11 +86,16 @@ function destroyAsteroid(i){
         //original size
         roids.push(newAsteroid(x, y, r / 2));
         roids.push(newAsteroid(x, y, r / 2));
+        score += ROID_PTS_LR;
     }
     else if(r == Math.ceil(ROID_SIZE/ 4)){
         //secong gen
         roids.push(newAsteroid(x, y, r / 4));
         roids.push(newAsteroid(x, y, r / 4));
+        score += ROID_PTS_ME;
+    }
+    else{
+        score += ROID_PTS_SM;
     }
 
     //last gen destroid
@@ -120,6 +128,7 @@ function newShip(){
 }
 
 function newGame(){
+    score = 0
     level = 0;
     //create ship
     lives = GAME_LIVES;
@@ -562,8 +571,18 @@ function update(){
         drawShip(SHIP_SIZE + i * 1.2 * SHIP_SIZE, SHIP_SIZE, 0.5 * Math.PI);
     }
 
+    //drawing score
+    ctx.textAlign = "center";
+    ctx.textBaseline = "right";
+    ctx.fillStyle = "white"
+    ctx.font = "small-caps " + (TEXT_SIZE - 10) + " arial";
+    console.log(score);
+    ctx.fillText(score, GAMEWIDTH - SHIP_SIZE / 2, SHIP_SIZE);
+
     //drawing the game text
     if(textAlpha >= 0){
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
         ctx.fillStyle = "rgba(255, 255, 255, " + textAlpha + ")";
         ctx.font = "small-caps " + TEXT_SIZE + "px arial";
         ctx.fillText(text, GAMEWIDTH * 0.43 , GAMEHEIGHT / 4);
