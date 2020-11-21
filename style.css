@@ -1,5 +1,7 @@
 body{
     font-family: 'Montserrat', sans-serif;
+    color:white;
+    background-image: url("background.jpg");
 }
 
 h1{
@@ -8,4 +10,20 @@ h1{
 
 canvas{
     border: 2px solid;
+}
+
+footer{
+    background-color: white;
+    color: black;
+    padding: 10px;
+    position: absolute;
+    bottom: 0px;
+    left: 0px;
+    width: 100%;
+    text-align: center;
+}
+
+a{
+    color: darkslateblue;
+    text-decoration: none;
 }
