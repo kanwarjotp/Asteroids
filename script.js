@@ -9,7 +9,7 @@ const GAMEHEIGHT = gameScreen.height;
 const SAVE_KEY_SCORE = "highscore"; //save key for local storage of highscore
 const SOUND_ON = false; //flag to prevent background sounds
 const MUSIC_ON = false;
-const GAME_LIVES = 3; //starting number of lives
+const GAME_LIVES = 5; //starting number of lives
 const SHIP_SIZE = 30;
 const TURN_SPEED = 360; // in degrees per second
 const SHIP_ACCL = 2;
@@ -320,6 +320,10 @@ function keyDown(evt) {
             ship.canShoot = true;
             break;
     }
+}
+
+function orientationChange(){
+    console.log(screen.orientation);
 }
 
 function explodeShip() {
@@ -681,6 +685,8 @@ function update() {
         newGame();
     }
 
+    //event listener for changing orientation;
+    screen.addEventListener("orientationchange", orientationChange());
 }
 
 update();
