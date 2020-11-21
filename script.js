@@ -7,6 +7,7 @@ var ctx = gameScreen.getContext("2d");
 const GAMEWIDTH = gameScreen.width;
 const GAMEHEIGHT = gameScreen.height;
 const SAVE_KEY_SCORE = "highscore"; //save key for local storage of highscore
+const SOUND_ON = true; //flag to prevent background sounds
 const GAME_LIVES = 3; //starting number of lives
 const SHIP_SIZE = 30;
 const TURN_SPEED = 360; // in degrees per second
@@ -34,6 +35,15 @@ const SHOW_BOUNDS = false; //show/hide collision bounding
 
 const TEXT_FADE_TIME = 2.5; //text fade time in seconds
 const TEXT_SIZE = 40; //text height in pixels
+
+//set up sounds
+var fxLaser = new Sound("sound/laser.m4a", 5, 0.5);
+var fxExplode = new Sound("sound/explode.m4a");
+var fxHit = new Sound("sound/hit.m4a", 5, 0.5);
+var fxThrust = new Sound("sound/thrust.m4a");
+
+//set up the music
+var music = new Music("sound/music-low.m4a", "sound/music-high.m4a");
 
 //set up the game parameters
 var level, ship, roids, score, scoreHigh, text, lives, textAlpha;
@@ -102,6 +112,7 @@ function destroyAsteroid(i){
     //checking for high score
     if(score > scoreHigh){
         scoreHigh = score;
+        fxHigh.play();
         localStorage.setItem(SAVE_KEY_SCORE,score);
     }
 
@@ -113,6 +124,8 @@ function destroyAsteroid(i){
         level++;
         newLevel();
     }
+
+    fxHit.play();
 }
 
 function newShip(){
@@ -134,8 +147,57 @@ function newShip(){
     };
 }
 
+function Sound(src, maxStreams = 1, vol = 1.0){
+    this.streamNum = 0;
+    this.streams = [];
+    for(var i = 0; i < maxStreams; i++){
+        this.streams.push(new Audio(src));
+        this.streams[i].volume = vol;
+    }
+
+    this.play = function(){
+        if(SOUND_ON){
+            this.streamNum = (this.streamNum + 1) % maxStreams;
+            this.streams[this.streamNum].play();
+        }
+    }
+
+    this.stop = function(){
+        this.streams[this.streamNum].pause();
+        this.streams[this.streamNum].currentTime = 0;
+    }
+
+}
+
+function Music(src1, src2){
+    this.soundLow = new Audio(src1);
+    this.soundHigh = new Audio(src2);
+    this.low = true; // true is low sound is playing
+    this.temp = 1.0; // secs per beat
+    this.beatTime = 0 ;// frames left until next beat
+
+    this.play = function(){
+        if(this.low){
+            this.soundLow.play();
+        }
+        else{
+            this.soundHigh.play();
+        }
+        this.low = !this.low; // switching
+    }
+
+    this.tick = function(){
+        if(this.beatTime == 0){
+            this.beatTime = Math.ceil(this.tempo * FPS);
+        }
+        else{
+            this.beatTime--;
+        }
+    }
+}
+
 function newGame(){
-    score = 0
+    score = 0;
     level = 0;
     scoreStr = localStorage.getItem(SAVE_KEY_SCORE);
     if(!scoreStr){
@@ -193,6 +255,7 @@ function shootLaser(){
                 dist: 0,
                 explodeTime: 0
             })
+            fxLaser.play();
         }
     }
 
@@ -249,6 +312,7 @@ function keyDown(evt){
 
 function explodeShip(){
     ship.explodeTime = SHIP_EXPLODE_DUR * FPS; //duration of exploding affect of ship
+    fxExplode.play();
 }
 
 function gameOver(){
@@ -261,6 +325,9 @@ function gameOver(){
 setInterval(update, 1000 / FPS );
 
 function update(){
+    //music play
+    music.tick();
+    music.play();
 
     var blinkOn = ship.blinkNum % 2 == 0 ? true : false;
     var exploding = ship.explodeTime > 0;
@@ -455,11 +522,13 @@ function update(){
             ctx.closePath();
             ctx.fill();
             ctx.stroke();
+            fxThrust.play();
         }
         else{
-            //when thrust is off friction of the space(in this case it exists) will slow the ship down
+            //when thrust is off, friction of the space(in this case it exists) will slow the ship down
             if(ship.xThrust != 0) ship.xThrust -= ship.xThrust * FRICTION_COEFF / FPS;
             if(ship.yThrust != 0)ship.yThrust -= ship.yThrust * FRICTION_COEFF / FPS;
+            fxThrust.stop();
         }
         ship.x += ship.xThrust;
         ship.y += ship.yThrust;
