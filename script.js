@@ -7,14 +7,15 @@ var ctx = gameScreen.getContext("2d");
 const GAMEWIDTH = gameScreen.width;
 const GAMEHEIGHT = gameScreen.height;
 const SAVE_KEY_SCORE = "highscore"; //save key for local storage of highscore
-const SOUND_ON = true; //flag to prevent background sounds
+const SOUND_ON = false; //flag to prevent background sounds
+const MUSIC_ON = false;
 const GAME_LIVES = 3; //starting number of lives
 const SHIP_SIZE = 30;
 const TURN_SPEED = 360; // in degrees per second
 const SHIP_ACCL = 2;
 const FRICTION_COEFF = 0.5;
 const SHIP_EXPLODE_DUR = 0.5;
-const SHIP_INVLB_DUR = 1; // time dur for which the ship is invulnerable after spawn
+const SHIP_INVLB_DUR = 3; // time dur for which the ship is invulnerable after spawn
 const SHIP_BLINK_DUR = 0.1; // time dur for which the ship blinks after spawn
 const MAX_LASERS = 10 // maximum number of lasers at one time
 const LASER_SPD = 500; //laser spd in pixel per sec
@@ -183,12 +184,14 @@ function Music(src1, src2) {
     this.beatTime = 0; // frames left until next beat
 
     this.play = function() {
-        if (this.low) {
-            this.soundLow.play();
-        } else {
-            this.soundHigh.play();
+        if(MUSIC_ON){
+            if (this.low) {
+                this.soundLow.play();
+            } else {
+                this.soundHigh.play();
+            }
+            this.low = !this.low; // switching
         }
-        this.low = !this.low; // switching
     }
 
     this.setAsteroidRatio = function(ratio) {
@@ -196,10 +199,12 @@ function Music(src1, src2) {
     }
 
     this.tick = function() {
-        if (this.beatTime == 0) {
-            this.beatTime = Math.ceil(this.tempo * FPS);
-        } else {
-            this.beatTime--;
+        if(MUSIC_ON){
+            if (this.beatTime == 0) {
+                this.beatTime = Math.ceil(this.tempo * FPS);
+            } else {
+                this.beatTime--;
+            }
         }
     }
 }
