@@ -44,6 +44,7 @@ var fxThrust = new Sound("sound/thrust.m4a");
 
 //set up the music
 var music = new Music("sound/music-low.m4a", "sound/music-high.m4a");
+var roidsLeft, roidsTotal;
 
 //set up the game parameters
 var level, ship, roids, score, scoreHigh, text, lives, textAlpha;
@@ -51,6 +52,9 @@ newGame();
 
 function createAsteroidBelt(){
     roids = []; //clearing the array
+    roidsTotal = (ROID_NUM + level) * 7;
+    roidsLeft = roidsTotal
+
     var x, y;
     for(var i = 0; i < ROID_NUM + level; i++){
         do{
@@ -112,20 +116,24 @@ function destroyAsteroid(i){
     //checking for high score
     if(score > scoreHigh){
         scoreHigh = score;
-        fxHigh.play();
         localStorage.setItem(SAVE_KEY_SCORE,score);
     }
 
     //last gen destroid
     roids.splice(i, 1);
 
+    //playing hit sound
+    fxHit.play();
+
+    //calc ratio roidsleft : roidstotal
+    roidsLeft--;
+    music.setAsteroidRatio(roidsLeft == 0 ? 1 : roidsLeft / roidsTotal);
+
     //new level when all asteroids destroyed
     if(roids.length == 0){
         level++;
         newLevel();
     }
-
-    fxHit.play();
 }
 
 function newShip(){
@@ -184,6 +192,10 @@ function Music(src1, src2){
             this.soundHigh.play();
         }
         this.low = !this.low; // switching
+    }
+
+    this.setAsteroidRatio = function(ratio){
+        this.tempo = 1.0 - 0.75 * (1.0 - this.ratio);
     }
 
     this.tick = function(){
